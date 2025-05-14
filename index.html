@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pregnancy Weight Gain Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .calculator {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .calculator h2 {
+            color: #6a1b9a;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .calculator label {
+            font-weight: bold;
+            color: #333;
+        }
+        .calculator input,
+        .calculator select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .calculator button {
+            background: #6a1b9a;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .calculator button:hover {
+            background: #4a148c;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            display: none;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-item {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .result-item p {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .result-item span {
+            font-size: 24px;
+            font-weight: bold;
+            color: #6a1b9a;
+        }
+        .progress-container {
+            margin-top: 20px;
+        }
+        .progress-bar {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #6a1b9a;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        .progress-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+        .error-message {
+            color: #e53935;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        .icon {
+            font-size: 24px;
+            margin-right: 10px;
+            color: #6a1b9a;
+        }
+        .weekly-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        .weekly-table th,
+        .weekly-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .weekly-table th {
+            background: #6a1b9a;
+            color: white;
+        }
+        .advice {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e3f2fd;
+            color: #0d47a1;
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Calculator Container -->
+    <div class="calculator">
+        <h2><i class="fas fa-baby icon"></i>Pregnancy Weight Gain Calculator</h2>
+
+        <!-- Input Fields -->
+        <label for="lmp"><i class="fas fa-calendar-alt icon"></i>Last Menstrual Period (LMP)</label>
+        <input type="date" id="lmp" name="lmp" onchange="calculatePregnancyWeek()">
+
+        <label for="pregnancyWeek"><i class="fas fa-calendar-week icon"></i>Current Pregnancy Week</label>
+        <input type="number" id="pregnancyWeek" name="pregnancyWeek" min="1" max="40" readonly>
+
+        <label for="height"><i class="fas fa-ruler-vertical icon"></i>Height (cm)</label>
+        <input type="number" id="height" name="height" placeholder="Enter your height" min="100" max="250">
+        <div id="heightError" class="error-message"></div>
+
+        <label for="weightUnit"><i class="fas fa-weight icon"></i>Select Weight Unit</label>
+        <select id="weightUnit" name="weightUnit" onchange="updateWeightPlaceholders()">
+            <option value="kg" selected>kg</option>
+            <option value="lbs">lbs</option>
+        </select>
+
+        <label for="preWeight" id="preWeightLabel"><i class="fas fa-weight icon"></i>Weight Before Pregnancy (kg)</label>
+        <input type="number" id="preWeight" name="preWeight" placeholder="Enter your weight before pregnancy in kg" min="30" max="200">
+        <div id="preWeightError" class="error-message"></div>
+
+        <label for="currentWeight" id="currentWeightLabel"><i class="fas fa-weight icon"></i>Weight Now (kg)</label>
+        <input type="number" id="currentWeight" name="currentWeight" placeholder="Enter your current weight in kg" min="30" max="200">
+        <div id="currentWeightError" class="error-message"></div>
+
+        <label><i class="fas fa-baby-carriage icon"></i>Are You Having</label>
+        <div>
+            <input type="radio" name="pregnancyType" value="single" checked> Single
+            <input type="radio" name="pregnancyType" value="twins"> Twins
+            <input type="radio" name="pregnancyType" value="triplets"> Triplets or other multiples
+        </div>
+
+        <button id="calculateButton" onclick="calculateWeightGain()">Show Results</button>
+
+        <!-- Results -->
+        <div class="result-container" id="resultContainer">
+            <div class="result-item">
+                <p>Your pre-pregnancy BMI</p>
+                <span id="prePregnancyBmiValue"></span>
+            </div>
+            <div class="result-item">
+                <p>Your Current BMI</p>
+                <span id="currentBmiValue"></span>
+            </div>
+            <div class="result-item">
+                <p>Recommended total weight gain</p>
+                <span id="recommendedWeightGainValue"></span>
+            </div>
+            <div class="result-item">
+                <p>Your current weight gain</p>
+                <span id="currentWeightGainValue"></span>
+            </div>
+            <div class="result-item">
+                <p>Your remaining weeks</p>
+                <span id="remainingWeeksValue"></span>
+            </div>
+            <div class="result-item">
+                <p>Expected Due Date</p>
+                <span id="dueDateValue"></span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+            </div>
+
+            <!-- Weekly Recommendations Table -->
+            <table class="weekly-table" id="weeklyTable">
+                <thead>
+                    <tr>
+                        <th>Week</th>
+                        <th>Expected Weight Gain (kg)</th>
+                    </tr>
+                </thead>
+                <tbody id="weeklyTableBody"></tbody>
+            </table>
+
+            <!-- Personalized Advice -->
+            <div class="advice" id="personalizedAdvice"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        function updateWeightPlaceholders() {
+            const weightUnit = document.getElementById('weightUnit').value;
+            const preWeightLabel = document.getElementById('preWeightLabel');
+            const currentWeightLabel = document.getElementById('currentWeightLabel');
+            const preWeightInput = document.getElementById('preWeight');
+            const currentWeightInput = document.getElementById('currentWeight');
+
+            if (weightUnit === 'lbs') {
+                preWeightLabel.textContent = 'Weight Before Pregnancy (lbs)';
+                currentWeightLabel.textContent = 'Weight Now (lbs)';
+                preWeightInput.placeholder = 'Enter your weight before pregnancy in lbs';
+                currentWeightInput.placeholder = 'Enter your current weight in lbs';
+            } else {
+                preWeightLabel.textContent = 'Weight Before Pregnancy (kg)';
+                currentWeightLabel.textContent = 'Weight Now (kg)';
+                preWeightInput.placeholder = 'Enter your weight before pregnancy in kg';
+                currentWeightInput.placeholder = 'Enter your current weight in kg';
+            }
+        }
+
+        function convertWeight(weight, unit) {
+            if (unit === 'lbs') {
+                return weight * 0.453592; // Convert pounds to kilograms
+            }
+            return weight; // Already in kilograms
+        }
+
+        function validateInputs() {
+            const height = document.getElementById('height').value;
+            const preWeight = document.getElementById('preWeight').value;
+            const currentWeight = document.getElementById('currentWeight').value;
+            const heightError = document.getElementById('heightError');
+            const preWeightError = document.getElementById('preWeightError');
+            const currentWeightError = document.getElementById('currentWeightError');
+
+            let isValid = true;
+
+            if (height < 100 || height > 250 || isNaN(height)) {
+                heightError.textContent = 'Please enter a valid height between 100cm and 250cm.';
+                isValid = false;
+            } else {
+                heightError.textContent = '';
+            }
+
+            if (preWeight < 30 || preWeight > 200 || isNaN(preWeight)) {
+                preWeightError.textContent = 'Please enter a valid weight between 30kg and 200kg.';
+                isValid = false;
+            } else {
+                preWeightError.textContent = '';
+            }
+
+            if (currentWeight < 30 || currentWeight > 200 || isNaN(currentWeight)) {
+                currentWeightError.textContent = 'Please enter a valid weight between 30kg and 200kg.';
+                isValid = false;
+            } else {
+                currentWeightError.textContent = '';
+            }
+
+            return isValid;
+        }
+
+        function calculatePregnancyWeek() {
+            const lmp = document.getElementById('lmp').value;
+            if (!lmp) return;
+
+            const lmpDate = new Date(lmp);
+            const today = new Date();
+            const diffTime = Math.abs(today - lmpDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const pregnancyWeek = Math.floor(diffDays / 7);
+
+            document.getElementById('pregnancyWeek').value = pregnancyWeek;
+
+            // Calculate Due Date (LMP + 280 days)
+            const dueDate = new Date(lmpDate);
+            dueDate.setDate(dueDate.getDate() + 280);
+            document.getElementById('dueDateValue').textContent = dueDate.toDateString();
+        }
+
+        function calculateWeightGain() {
+            if (!validateInputs()) {
+                return;
+            }
+
+            const height = parseFloat(document.getElementById('height').value);
+            const preWeight = parseFloat(document.getElementById('preWeight').value);
+            const currentWeight = parseFloat(document.getElementById('currentWeight').value);
+            const weightUnit = document.getElementById('weightUnit').value;
+            const pregnancyType = document.querySelector('input[name="pregnancyType"]:checked').value;
+            const pregnancyWeek = parseInt(document.getElementById('pregnancyWeek').value);
+
+            // Convert weights to kilograms
+            const preWeightKg = convertWeight(preWeight, weightUnit);
+            const currentWeightKg = convertWeight(currentWeight, weightUnit);
+
+            // Calculate BMI
+            const heightInMeters = height / 100;
+            const prePregnancyBmi = (preWeightKg / (heightInMeters * heightInMeters)).toFixed(1);
+            const currentBmi = (currentWeightKg / (heightInMeters * heightInMeters)).toFixed(1);
+
+            // Calculate Remaining Weeks
+            const remainingWeeks = 40 - pregnancyWeek;
+
+            // Recommended weight gain
+            let recommendedWeightGain;
+            switch (pregnancyType) {
+                case 'single':
+                    recommendedWeightGain = [11.5, 16]; // kg
+                    break;
+                case 'twins':
+                    recommendedWeightGain = [16.8, 24.5]; // kg
+                    break;
+                case 'triplets':
+                    recommendedWeightGain = [21.5, 28]; // kg
+                    break;
+                default:
+                    recommendedWeightGain = [11.5, 16]; // kg
+            }
+
+            const totalWeightGain = (currentWeightKg - preWeightKg).toFixed(1);
+            const minWeightGain = recommendedWeightGain[0];
+            const maxWeightGain = recommendedWeightGain[1];
+
+            const weightGainStatus = totalWeightGain < minWeightGain || totalWeightGain > maxWeightGain ? 'result-high' : 'result-normal';
+
+            document.getElementById('prePregnancyBmiValue').textContent = prePregnancyBmi;
+            document.getElementById('currentBmiValue').textContent = currentBmi;
+            document.getElementById('recommendedWeightGainValue').textContent = `${minWeightGain} - ${maxWeightGain} kg`;
+            document.getElementById('currentWeightGainValue').textContent = `${totalWeightGain} kg`;
+            document.getElementById('remainingWeeksValue').textContent = remainingWeeks;
+
+            // Show the results
+            document.getElementById('resultContainer').style.display = 'block';
+
+            // Update progress bar
+            const expectedWeeklyGain = getWeeklyGain(prePregnancyBmi, pregnancyType);
+            const expectedTotalGain = expectedWeeklyGain * pregnancyWeek;
+            const progressPercentage = (totalWeightGain / expectedTotalGain) * 100;
+
+            const progressBarFill = document.getElementById('progressBarFill');
+            progressBarFill.style.width = `${Math.min(progressPercentage, 100)}%`;
+            document.getElementById('progressText').textContent = `You are ${progressPercentage.toFixed(1)}% of your expected weight gain for week ${pregnancyWeek}.`;
+
+            // Generate Weekly Recommendations
+            generateWeeklyTable(prePregnancyBmi, pregnancyType, pregnancyWeek);
+
+            // Provide Personalized Advice
+            providePersonalizedAdvice(totalWeightGain, minWeightGain, maxWeightGain);
+        }
+
+        function getWeeklyGain(bmi, pregnancyType) {
+            let weeklyGain;
+            if (pregnancyType === 'single') {
+                if (bmi < 18.5) {
+                    weeklyGain = 0.5; // Underweight
+                } else if (bmi >= 18.5 && bmi < 25) {
+                    weeklyGain = 0.4; // Normal weight
+                } else if (bmi >= 25 && bmi < 30) {
+                    weeklyGain = 0.3; // Overweight
+                } else {
+                    weeklyGain = 0.2; // Obese
+                }
+            } else if (pregnancyType === 'twins') {
+                weeklyGain = 0.7; // Higher for twins
+            } else if (pregnancyType === 'triplets') {
+                weeklyGain = 0.9; // Higher for triplets
+            }
+            return weeklyGain;
+        }
+
+        function generateWeeklyTable(bmi, pregnancyType, currentWeek) {
+            const weeklyTableBody = document.getElementById('weeklyTableBody');
+            weeklyTableBody.innerHTML = ''; // Clear previous content
+
+            const weeklyGain = getWeeklyGain(bmi, pregnancyType);
+
+            for (let week = 1; week <= 40; week++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${week}</td>
+                    <td>${(weeklyGain * week).toFixed(1)} kg</td>
+                `;
+                if (week === currentWeek) {
+                    row.style.backgroundColor = '#e3f2fd'; // Highlight current week
+                }
+                weeklyTableBody.appendChild(row);
+            }
+        }
+
+        function providePersonalizedAdvice(totalWeightGain, minWeightGain, maxWeightGain) {
+            const adviceElement = document.getElementById('personalizedAdvice');
+            if (totalWeightGain < minWeightGain) {
+                adviceElement.textContent = 'You are below the recommended weight gain. Consider increasing your calorie intake slightly.';
+                adviceElement.style.backgroundColor = '#fff3e0';
+                adviceElement.style.color = '#e65100';
+            } else if (totalWeightGain > maxWeightGain) {
+                adviceElement.textContent = 'You are above the recommended weight gain. Consult your doctor for dietary adjustments.';
+                adviceElement.style.backgroundColor = '#ffebee';
+                adviceElement.style.color = '#c62828';
+            } else {
+                adviceElement.textContent = 'You are on track! Keep up the good work.';
+                adviceElement.style.backgroundColor = '#e8f5e9';
+                adviceElement.style.color = '#2e7d32';
+            }
+        }
+    </script>
+</body>
+</html>
